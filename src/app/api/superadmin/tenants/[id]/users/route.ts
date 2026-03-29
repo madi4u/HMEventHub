@@ -47,3 +47,33 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   if (error) return NextResponse.json({ error: error.message }, { status: 400 })
   return NextResponse.json({ success: true })
 }
+
+const deleteSchema = z.object({
+  profileId: z.string().uuid(),
+  userId: z.string().uuid(),
+})
+
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Nicht authentifiziert' }, { status: 401 })
+
+  const { data: profile } = await supabase.from('profiles').select('role').eq('user_id', user.id).single()
+  if (!profile || profile.role !== 'TENANT_ADMIN') return NextResponse.json({ error: 'Nicht berechtigt' }, { status: 403 })
+
+  const body = await request.json()
+  const parsed = deleteSchema.safeParse(body)
+  if (!parsed.success) return NextResponse.json({ error: 'Ungültige Eingabe' }, { status: 400 })
+
+  // Prevent self-deletion
+  if (parsed.data.userId === user.id) return NextResponse.json({ error: 'Sie können sich nicht selbst löschen' }, { status: 400 })
+
+  const admin = createAdminClient()
+
+  // Delete auth user (cascades to profile via DB trigger)
+  const { error } = await admin.auth.admin.deleteUser(parsed.data.userId)
+  if (error) return NextResponse.json({ error: error.message }, { status: 400 })
+
+  return NextResponse.json({ success: true })
+}

@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { Loader2, UserPlus } from 'lucide-react'
+import { Loader2, UserPlus, Trash2 } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -22,7 +22,7 @@ const roleLabels: Record<string, string> = {
 }
 
 interface UserProfile {
-  id: string; full_name: string; email: string; role: string; is_active: boolean; preferred_language: string
+  id: string; user_id: string; full_name: string; email: string; role: string; is_active: boolean; preferred_language: string
 }
 
 const inviteSchema = z.object({
@@ -34,6 +34,8 @@ type InviteData = z.infer<typeof inviteSchema>
 function EditUserDialog({ tenantId, user, onSaved }: { tenantId: string; user: UserProfile; onSaved: () => void }) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
   const [role, setRole] = useState(user.role)
   const [isActive, setIsActive] = useState(user.is_active)
 
@@ -53,46 +55,86 @@ function EditUserDialog({ tenantId, user, onSaved }: { tenantId: string; user: U
     } catch { toast.error('Fehler') } finally { setLoading(false) }
   }
 
+  async function deleteUser() {
+    setDeleting(true)
+    try {
+      const res = await fetch(`/api/superadmin/tenants/${tenantId}/users`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ profileId: user.id, userId: user.user_id }),
+      })
+      const json = await res.json()
+      if (!res.ok) { toast.error(json.error); return }
+      toast.success(`${user.full_name} wurde gelöscht`)
+      setOpen(false)
+      onSaved()
+    } catch { toast.error('Fehler') } finally { setDeleting(false) }
+  }
+
+  function handleOpenChange(v: boolean) {
+    setOpen(v)
+    if (!v) setConfirmDelete(false)
+  }
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button variant="ghost" size="sm">Bearbeiten</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-sm">
         <DialogHeader><DialogTitle>{user.full_name} bearbeiten</DialogTitle></DialogHeader>
-        <div className="space-y-4 py-2">
-          <div className="space-y-2">
-            <Label>E-Mail</Label>
-            <p className="text-sm text-muted-foreground">{user.email}</p>
+        {confirmDelete ? (
+          <div className="space-y-4 py-2">
+            <p className="text-sm">Benutzer <strong>{user.full_name}</strong> ({user.email}) wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.</p>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setConfirmDelete(false)}>Abbrechen</Button>
+              <Button variant="destructive" onClick={deleteUser} disabled={deleting}>
+                {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Endgültig löschen'}
+              </Button>
+            </DialogFooter>
           </div>
-          <div className="space-y-2">
-            <Label>Rolle</Label>
-            <Select value={role} onValueChange={setRole}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {Object.entries(roleLabels).filter(([k]) => k !== 'SUPERADMIN').map(([v, l]) => (
-                  <SelectItem key={v} value={v}>{l}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label>Status</Label>
-            <Select value={isActive ? 'active' : 'inactive'} onValueChange={(v) => setIsActive(v === 'active')}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="active">Aktiv</SelectItem>
-                <SelectItem value="inactive">Deaktiviert</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)}>Abbrechen</Button>
-          <Button onClick={save} disabled={loading}>
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Speichern'}
-          </Button>
-        </DialogFooter>
+        ) : (
+          <>
+            <div className="space-y-4 py-2">
+              <div className="space-y-2">
+                <Label>E-Mail</Label>
+                <p className="text-sm text-muted-foreground">{user.email}</p>
+              </div>
+              <div className="space-y-2">
+                <Label>Rolle</Label>
+                <Select value={role} onValueChange={setRole}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(roleLabels).filter(([k]) => k !== 'SUPERADMIN').map(([v, l]) => (
+                      <SelectItem key={v} value={v}>{l}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Status</Label>
+                <Select value={isActive ? 'active' : 'inactive'} onValueChange={(v) => setIsActive(v === 'active')}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">Aktiv</SelectItem>
+                    <SelectItem value="inactive">Deaktiviert</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter className="flex-col gap-2 sm:flex-row sm:justify-between">
+              <Button variant="destructive" size="sm" onClick={() => setConfirmDelete(true)}>
+                <Trash2 className="h-4 w-4 mr-1" />Benutzer löschen
+              </Button>
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={() => setOpen(false)}>Abbrechen</Button>
+                <Button onClick={save} disabled={loading}>
+                  {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Speichern'}
+                </Button>
+              </div>
+            </DialogFooter>
+          </>
+        )}
       </DialogContent>
     </Dialog>
   )
