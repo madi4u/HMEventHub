@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { LogisticsClient } from './logistics-client'
 import { isManagerRole } from '@/lib/utils'
-import type { Vehicle, Foodtruck, UserRole } from '@/types'
+import type { Vehicle, Foodtruck, CoolingTrailer, Equipment, UserRole } from '@/types'
 
 export default async function LogisticsPage() {
   const supabase = await createClient()
@@ -35,8 +35,9 @@ export default async function LogisticsPage() {
     <LogisticsClient
       vehicles={(vehicles ?? []) as Vehicle[]}
       foodtrucks={(foodtrucks ?? []) as Foodtruck[]}
-      coolingTrailers={(coolingTrailers ?? []) as { id: string; name: string; status: string }[]}
-      equipment={(equipment ?? []) as { id: string; name: string; status: string }[]}
+      coolingTrailers={(coolingTrailers ?? []) as CoolingTrailer[]}
+      equipment={(equipment ?? []) as Equipment[]}
+      tenantId={profile.tenant_id}
     />
   )
 }

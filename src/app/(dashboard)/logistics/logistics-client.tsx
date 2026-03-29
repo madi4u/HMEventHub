@@ -10,16 +10,18 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table'
 import { useTranslation } from '@/i18n'
-import type { Vehicle, Foodtruck } from '@/types'
+import { AddLogisticsDialog } from './add-logistics-dialog'
+import type { Vehicle, Foodtruck, CoolingTrailer, Equipment } from '@/types'
 
 interface LogisticsClientProps {
   vehicles: Vehicle[]
   foodtrucks: Foodtruck[]
-  coolingTrailers: { id: string; name: string; status: string }[]
-  equipment: { id: string; name: string; status: string }[]
+  coolingTrailers: CoolingTrailer[]
+  equipment: Equipment[]
+  tenantId: string
 }
 
-export function LogisticsClient({ vehicles, foodtrucks, coolingTrailers, equipment }: LogisticsClientProps) {
+export function LogisticsClient({ vehicles, foodtrucks, coolingTrailers, equipment, tenantId }: LogisticsClientProps) {
   const { t, tenantName } = useTranslation()
 
   const statusColors: Record<string, string> = {
@@ -28,8 +30,10 @@ export function LogisticsClient({ vehicles, foodtrucks, coolingTrailers, equipme
     IN_REPAIR: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
   }
 
-  function statusLabel(s: string) {
-    return t(`status.${s}` as Parameters<typeof t>[0]) || s
+  const statusLabel: Record<string, string> = {
+    ACTIVE: 'Aktiv',
+    INACTIVE: 'Inaktiv',
+    IN_REPAIR: 'In Reparatur',
   }
 
   return (
@@ -50,8 +54,13 @@ export function LogisticsClient({ vehicles, foodtrucks, coolingTrailers, equipme
           <TabsTrigger value="equipment">{t('logistics.equipment')} ({equipment.length})</TabsTrigger>
         </TabsList>
 
+        {/* Fahrzeuge */}
         <TabsContent value="vehicles">
           <Card className="border-border">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+              <span className="text-sm font-medium">{t('logistics.vehicles')}</span>
+              <AddLogisticsDialog type="vehicles" tenantId={tenantId} />
+            </div>
             <CardContent className="p-0">
               <Table>
                 <TableHeader>
@@ -60,7 +69,7 @@ export function LogisticsClient({ vehicles, foodtrucks, coolingTrailers, equipme
                     <TableHead>{t('logistics.licensePlate')}</TableHead>
                     <TableHead>{t('common.type')}</TableHead>
                     <TableHead>{t('common.status')}</TableHead>
-                    <TableHead className="text-right">{t('common.actions')}</TableHead>
+                    <TableHead>Notizen</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -79,12 +88,10 @@ export function LogisticsClient({ vehicles, foodtrucks, coolingTrailers, equipme
                         <TableCell className="text-muted-foreground">{v.type ?? '—'}</TableCell>
                         <TableCell>
                           <Badge variant="outline" className={`text-xs ${statusColors[v.status] ?? ''}`}>
-                            {statusLabel(v.status)}
+                            {statusLabel[v.status] ?? v.status}
                           </Badge>
                         </TableCell>
-                        <TableCell className="text-right">
-                          <Button variant="ghost" size="sm">{t('common.edit')}</Button>
-                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground">{v.notes ?? '—'}</TableCell>
                       </TableRow>
                     ))
                   )}
@@ -94,8 +101,13 @@ export function LogisticsClient({ vehicles, foodtrucks, coolingTrailers, equipme
           </Card>
         </TabsContent>
 
+        {/* Foodtrucks */}
         <TabsContent value="foodtrucks">
           <Card className="border-border">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+              <span className="text-sm font-medium">{t('logistics.foodtrucks')}</span>
+              <AddLogisticsDialog type="foodtrucks" tenantId={tenantId} />
+            </div>
             <CardContent className="p-0">
               <Table>
                 <TableHeader>
@@ -103,7 +115,7 @@ export function LogisticsClient({ vehicles, foodtrucks, coolingTrailers, equipme
                     <TableHead>{t('common.name')}</TableHead>
                     <TableHead>{t('common.type')}</TableHead>
                     <TableHead>{t('common.status')}</TableHead>
-                    <TableHead className="text-right">{t('common.actions')}</TableHead>
+                    <TableHead>Notizen</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -120,12 +132,10 @@ export function LogisticsClient({ vehicles, foodtrucks, coolingTrailers, equipme
                         <TableCell className="text-muted-foreground">{f.type ?? '—'}</TableCell>
                         <TableCell>
                           <Badge variant="outline" className={`text-xs ${statusColors[f.status] ?? ''}`}>
-                            {statusLabel(f.status)}
+                            {statusLabel[f.status] ?? f.status}
                           </Badge>
                         </TableCell>
-                        <TableCell className="text-right">
-                          <Button variant="ghost" size="sm">{t('common.edit')}</Button>
-                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground">{f.notes ?? '—'}</TableCell>
                       </TableRow>
                     ))
                   )}
@@ -135,18 +145,88 @@ export function LogisticsClient({ vehicles, foodtrucks, coolingTrailers, equipme
           </Card>
         </TabsContent>
 
+        {/* Kühlwagen */}
         <TabsContent value="cooling">
           <Card className="border-border">
-            <CardContent className="text-center py-8 text-muted-foreground">
-              {coolingTrailers.length === 0 ? t('logistics.noCoolingTrailers') : `${coolingTrailers.length} ${t('logistics.coolingTrailers')}`}
+            <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+              <span className="text-sm font-medium">{t('logistics.coolingTrailers')}</span>
+              <AddLogisticsDialog type="cooling_trailers" tenantId={tenantId} />
+            </div>
+            <CardContent className="p-0">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-border">
+                    <TableHead>{t('common.name')}</TableHead>
+                    <TableHead>{t('common.status')}</TableHead>
+                    <TableHead>Notizen</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {coolingTrailers.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={3} className="text-center py-8 text-muted-foreground">
+                        {t('logistics.noCoolingTrailers')}
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    coolingTrailers.map((c) => (
+                      <TableRow key={c.id} className="border-border">
+                        <TableCell className="font-medium">{c.name}</TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className={`text-xs ${statusColors[c.status] ?? ''}`}>
+                            {statusLabel[c.status] ?? c.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground">{c.notes ?? '—'}</TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
             </CardContent>
           </Card>
         </TabsContent>
 
+        {/* Equipment */}
         <TabsContent value="equipment">
           <Card className="border-border">
-            <CardContent className="text-center py-8 text-muted-foreground">
-              {equipment.length === 0 ? t('logistics.noEquipment') : `${equipment.length} ${t('logistics.equipment')}`}
+            <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+              <span className="text-sm font-medium">{t('logistics.equipment')}</span>
+              <AddLogisticsDialog type="equipment" tenantId={tenantId} />
+            </div>
+            <CardContent className="p-0">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-border">
+                    <TableHead>{t('common.name')}</TableHead>
+                    <TableHead>Kategorie</TableHead>
+                    <TableHead>{t('common.status')}</TableHead>
+                    <TableHead>Notizen</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {equipment.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                        {t('logistics.noEquipment')}
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    equipment.map((e) => (
+                      <TableRow key={e.id} className="border-border">
+                        <TableCell className="font-medium">{e.name}</TableCell>
+                        <TableCell className="text-muted-foreground">{e.category ?? '—'}</TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className={`text-xs ${statusColors[e.status] ?? ''}`}>
+                            {statusLabel[e.status] ?? e.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground">{e.notes ?? '—'}</TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
             </CardContent>
           </Card>
         </TabsContent>
