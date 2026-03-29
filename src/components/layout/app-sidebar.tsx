@@ -168,13 +168,13 @@ export function AppSidebar({ profile }: AppSidebarProps) {
   )
 
   return (
-    <Sidebar>
+    <Sidebar collapsible="icon">
       <SidebarHeader className="border-b border-sidebar-border px-4 py-4">
         <Link href={isManager ? '/dashboard' : '/my-events'} className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-md bg-sidebar-primary flex items-center justify-center flex-shrink-0">
             <span className="text-white font-bold text-sm">H</span>
           </div>
-          <div className="flex flex-col">
+          <div className="flex flex-col group-data-[collapsible=icon]:hidden">
             <span className="font-semibold text-sidebar-foreground text-sm">H+M EventHub</span>
             <span className="text-xs text-sidebar-foreground/60">Catering Management</span>
           </div>
@@ -191,7 +191,7 @@ export function AppSidebar({ profile }: AppSidebarProps) {
                 const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
                 return (
                   <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton asChild isActive={isActive}>
+                    <SidebarMenuButton asChild isActive={isActive} tooltip={item.title}>
                       <Link href={item.href} className={cn(
                         'flex items-center gap-2',
                         isActive && 'text-sidebar-primary-foreground bg-sidebar-primary'
@@ -217,7 +217,7 @@ export function AppSidebar({ profile }: AppSidebarProps) {
                   const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
                   return (
                     <SidebarMenuItem key={item.href}>
-                      <SidebarMenuButton asChild isActive={isActive}>
+                      <SidebarMenuButton asChild isActive={isActive} tooltip={item.title}>
                         <Link href={item.href} className={cn(
                           'flex items-center gap-2',
                           isActive && 'text-sidebar-primary-foreground bg-sidebar-primary'
