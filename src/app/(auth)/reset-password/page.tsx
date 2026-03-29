@@ -43,14 +43,14 @@ export default function ResetPasswordPage() {
       })
 
       if (error) {
-        toast.error(t('errors.networkError'))
+        toast.error(error.message)
         return
       }
 
       setSent(true)
       toast.success(t('auth.resetPasswordSuccess'))
-    } catch {
-      toast.error(t('errors.networkError'))
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Verbindung fehlgeschlagen')
     } finally {
       setLoading(false)
     }

@@ -48,7 +48,7 @@ function LoginForm() {
       })
 
       if (error) {
-        toast.error(t('errors.loginFailed'))
+        toast.error(error.message)
         return
       }
 
@@ -79,8 +79,8 @@ function LoginForm() {
 
         router.refresh()
       }
-    } catch {
-      toast.error(t('errors.networkError'))
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Verbindung fehlgeschlagen')
     } finally {
       setLoading(false)
     }
