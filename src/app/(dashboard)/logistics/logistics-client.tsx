@@ -113,7 +113,10 @@ export function LogisticsClient({ vehicles, foodtrucks, coolingTrailers, equipme
                 <TableHeader>
                   <TableRow className="border-border">
                     <TableHead>{t('common.name')}</TableHead>
+                    <TableHead>Kennzeichen</TableHead>
+                    <TableHead>Hersteller</TableHead>
                     <TableHead>{t('common.type')}</TableHead>
+                    <TableHead>Art</TableHead>
                     <TableHead>{t('common.status')}</TableHead>
                     <TableHead>Notizen</TableHead>
                   </TableRow>
@@ -121,7 +124,7 @@ export function LogisticsClient({ vehicles, foodtrucks, coolingTrailers, equipme
                 <TableBody>
                   {foodtrucks.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                      <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                         {t('logistics.noFoodtrucks')}
                       </TableCell>
                     </TableRow>
@@ -129,7 +132,10 @@ export function LogisticsClient({ vehicles, foodtrucks, coolingTrailers, equipme
                     foodtrucks.map((f) => (
                       <TableRow key={f.id} className="border-border">
                         <TableCell className="font-medium">{f.name}</TableCell>
+                        <TableCell className="text-muted-foreground">{f.license_plate ?? '—'}</TableCell>
+                        <TableCell className="text-muted-foreground">{f.manufacturer ?? '—'}</TableCell>
                         <TableCell className="text-muted-foreground">{f.type ?? '—'}</TableCell>
+                        <TableCell className="text-muted-foreground">{f.is_truck ? 'Truck' : 'Trailer'}</TableCell>
                         <TableCell>
                           <Badge variant="outline" className={`text-xs ${statusColors[f.status] ?? ''}`}>
                             {statusLabel[f.status] ?? f.status}

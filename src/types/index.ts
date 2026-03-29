@@ -157,6 +157,9 @@ export interface Foodtruck {
   tenant_id: string
   name: string
   type: string | null
+  license_plate: string | null
+  manufacturer: string | null
+  is_truck: boolean
   status: string
   notes: string | null
   created_at: string
