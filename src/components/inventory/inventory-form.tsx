@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
+import { useRouter } from 'next/navigation'
 import { Loader2, Camera, Plus, Minus } from 'lucide-react'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
@@ -26,6 +27,7 @@ interface ItemEntry {
 }
 
 export function InventoryForm({ eventId, eventDays, products, tenantId, onSuccess }: InventoryFormProps) {
+  const router = useRouter()
   const [sessionType, setSessionType] = useState<InventorySessionType>('INTAKE')
   const [dayId, setDayId] = useState('none')
   const [notes, setNotes] = useState('')
@@ -114,10 +116,8 @@ export function InventoryForm({ eventId, eventDays, products, tenantId, onSucces
       )
 
       toast.success('Inventur gespeichert')
-      setItems([])
-      setNotes('')
-      setPhoto(null)
       onSuccess?.()
+      router.push(`/events/${eventId}?tab=inventory`)
     } catch {
       toast.error('Unerwarteter Fehler')
     } finally {
