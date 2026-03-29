@@ -44,7 +44,7 @@ interface EventTimeTrackingTabProps {
 const editSchema = z.object({
   clock_in: z.string().min(1, 'Pflichtfeld'),
   clock_out: z.string().min(1, 'Pflichtfeld'),
-  break_minutes: z.coerce.number().min(0),
+  break_minutes: z.number().min(0),
   admin_note: z.string().max(500).optional(),
 })
 type EditForm = z.infer<typeof editSchema>
@@ -145,7 +145,7 @@ function EditEntryDialog({
             </div>
             <div className="space-y-1">
               <Label className="text-xs">Pause (Minuten)</Label>
-              <Input type="number" min={0} {...register('break_minutes')} disabled={loading} className="max-w-[120px] text-xs" />
+              <Input type="number" min={0} {...register('break_minutes', { valueAsNumber: true })} disabled={loading} className="max-w-[120px] text-xs" />
             </div>
 
             {/* Geolocation */}
