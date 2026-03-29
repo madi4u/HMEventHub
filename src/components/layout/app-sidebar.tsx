@@ -76,7 +76,7 @@ export function AppSidebar({ profile }: AppSidebarProps) {
       title: 'Mandant',
       href: '/mandanten',
       icon: Building2,
-      roles: ['TENANT_ADMIN'],
+      roles: ['TENANT_ADMIN', 'OWNER'],
     },
     {
       title: t('nav.logistics'),
