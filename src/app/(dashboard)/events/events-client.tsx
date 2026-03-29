@@ -68,7 +68,11 @@ export function EventsClient({ events }: { events: EventRow[] }) {
               ) : (
                 events.map((event) => (
                   <TableRow key={event.id} className="border-border">
-                    <TableCell className="font-medium">{event.title}</TableCell>
+                    <TableCell className="font-medium">
+                      <Link href={`/events/${event.id}`} className="hover:underline">
+                        {event.title}
+                      </Link>
+                    </TableCell>
                     <TableCell>
                       <span className="text-sm text-muted-foreground">
                         {getEventTypeLabel(event.event_type, language)}
