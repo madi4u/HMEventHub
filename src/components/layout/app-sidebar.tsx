@@ -17,6 +17,7 @@ import {
   ShoppingBag,
   ShieldAlert,
   User,
+  Building2,
 } from 'lucide-react'
 
 import {
@@ -70,6 +71,12 @@ export function AppSidebar({ profile }: AppSidebarProps) {
       href: '/users',
       icon: Users,
       roles: ['SUPERADMIN', 'TENANT_ADMIN', 'OWNER'],
+    },
+    {
+      title: 'Mandant',
+      href: '/mandanten',
+      icon: Building2,
+      roles: ['TENANT_ADMIN'],
     },
     {
       title: t('nav.logistics'),
