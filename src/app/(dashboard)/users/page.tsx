@@ -1,9 +1,10 @@
 import { redirect } from 'next/navigation'
-import { Plus, Users } from 'lucide-react'
+import { Users } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { PageHeader } from '@/components/layout/page-header'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { InviteUserDialog } from './invite-dialog'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Card, CardContent } from '@/components/ui/card'
 import {
@@ -58,12 +59,7 @@ export default async function UsersPage() {
           { label: 'Dashboard', href: '/dashboard' },
           { label: 'Benutzer' },
         ]}
-        actions={
-          <Button size="sm">
-            <Plus className="h-4 w-4 mr-1" />
-            Benutzer einladen
-          </Button>
-        }
+        actions={<InviteUserDialog />}
       />
 
       <Card className="border-border">
