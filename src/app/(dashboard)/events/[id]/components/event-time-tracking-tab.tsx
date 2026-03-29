@@ -20,13 +20,19 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from '@/components/ui/dialog'
 import { formatDateTime, formatDuration, getDurationInMinutes } from '@/lib/utils'
-import type { TimeEntry } from '@/types'
-
-interface TimeEntryWithProfile extends TimeEntry {
-  profile: { full_name: string; email: string } | null
+interface TimeEntryWithProfile {
+  id: string
+  event_id: string
+  user_id: string
+  tenant_id: string
+  clock_in: string
+  clock_out: string | null
+  break_minutes: number | null
+  status: string
+  admin_note: string | null
   location_in: { lat: number; lng: number; accuracy?: number } | null
   location_out: { lat: number; lng: number; accuracy?: number } | null
-  admin_note: string | null
+  profile: { full_name: string; email: string } | null
 }
 
 interface EventTimeTrackingTabProps {
