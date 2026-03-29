@@ -27,7 +27,7 @@ interface ItemEntry {
 
 export function InventoryForm({ eventId, eventDays, products, tenantId, onSuccess }: InventoryFormProps) {
   const [sessionType, setSessionType] = useState<InventorySessionType>('INTAKE')
-  const [dayId, setDayId] = useState('')
+  const [dayId, setDayId] = useState('none')
   const [notes, setNotes] = useState('')
   const [items, setItems] = useState<ItemEntry[]>([])
   const [photo, setPhoto] = useState<File | null>(null)
@@ -90,7 +90,7 @@ export function InventoryForm({ eventId, eventDays, products, tenantId, onSucces
         .insert({
           event_id: eventId,
           tenant_id: tenantId,
-          event_day_id: dayId || null,
+          event_day_id: dayId === 'none' ? null : dayId,
           session_type: sessionType,
           photo_url: photoPath,
           notes: notes || null,
@@ -149,7 +149,7 @@ export function InventoryForm({ eventId, eventDays, products, tenantId, onSucces
                 <SelectValue placeholder="Tag auswählen" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Kein Tag</SelectItem>
+                <SelectItem value="none">Kein Tag</SelectItem>
                 {eventDays.map((d) => (
                   <SelectItem key={d.id} value={d.id}>
                     {d.day_label}
