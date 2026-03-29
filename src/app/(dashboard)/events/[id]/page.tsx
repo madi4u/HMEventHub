@@ -37,6 +37,12 @@ export default async function EventDetailPage({
 
   if (!profile) redirect('/login')
 
+  const { data: tenant } = await supabase
+    .from('tenants')
+    .select('name')
+    .eq('id', profile.tenant_id)
+    .single()
+
   const { data: event } = await supabase
     .from('events')
     .select('*')
@@ -66,7 +72,7 @@ export default async function EventDetailPage({
       <PageHeader
         title={event.title}
         breadcrumbs={[
-          { label: 'Dashboard', href: '/dashboard' },
+          { label: tenant?.name || 'EventHub', href: '/dashboard' },
           { label: 'Veranstaltungen', href: '/events' },
           { label: event.title },
         ]}

@@ -12,6 +12,7 @@ interface I18nContextType {
   language: PreferredLanguage
   setLanguage: (lang: PreferredLanguage) => void
   translations: Translations
+  tenantName: string
 }
 
 export const I18nContext = createContext<I18nContextType | null>(null)
@@ -27,9 +28,10 @@ const LANGUAGE_STORAGE_KEY = 'eventhub_language'
 interface I18nProviderProps {
   children: React.ReactNode
   initialLanguage?: PreferredLanguage
+  tenantName?: string
 }
 
-export function I18nProvider({ children, initialLanguage = 'de' }: I18nProviderProps) {
+export function I18nProvider({ children, initialLanguage = 'de', tenantName = '' }: I18nProviderProps) {
   const [language, setLanguageState] = useState<PreferredLanguage>(initialLanguage)
 
   // On mount, check localStorage for saved preference
@@ -48,7 +50,7 @@ export function I18nProvider({ children, initialLanguage = 'de' }: I18nProviderP
   const translations = translationMap[language] ?? de
 
   return (
-    <I18nContext.Provider value={{ language, setLanguage, translations }}>
+    <I18nContext.Provider value={{ language, setLanguage, translations, tenantName }}>
       {children}
     </I18nContext.Provider>
   )

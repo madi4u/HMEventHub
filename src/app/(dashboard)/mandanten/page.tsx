@@ -53,7 +53,7 @@ export default async function MandantenPage() {
       <PageHeader
         title="Mandant"
         breadcrumbs={[
-          { label: 'Dashboard', href: '/dashboard' },
+          { label: tenant.name || 'EventHub', href: '/dashboard' },
           { label: 'Mandant' },
         ]}
       />

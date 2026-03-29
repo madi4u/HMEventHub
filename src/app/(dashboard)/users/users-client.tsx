@@ -17,7 +17,7 @@ import type { Profile } from '@/types'
 const MANAGEABLE_ROLES = ['EVENT_MANAGER', 'STANDLEITER', 'EMPLOYEE', 'READ_ONLY']
 
 export function UsersClient({ users }: { users: Profile[] }) {
-  const { t } = useTranslation()
+  const { t, tenantName } = useTranslation()
 
   const langLabels: Record<string, string> = { de: '🇩🇪 DE', en: '🇬🇧 EN', es: '🇪🇸 ES' }
 
@@ -26,7 +26,7 @@ export function UsersClient({ users }: { users: Profile[] }) {
       <PageHeader
         title={t('users.title')}
         breadcrumbs={[
-          { label: t('nav.dashboard'), href: '/dashboard' },
+          { label: tenantName || 'EventHub', href: '/dashboard' },
           { label: t('users.title') },
         ]}
         actions={<InviteUserDialog />}

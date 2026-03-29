@@ -35,7 +35,7 @@ export function useTranslation() {
     throw new Error('useTranslation must be used within an I18nProvider')
   }
 
-  const { translations, language, setLanguage } = context
+  const { translations, language, setLanguage, tenantName } = context
 
   function t(key: string, vars?: Record<string, string | number>): string {
     const value = getNestedValue(translations as unknown as Record<string, unknown>, key)
@@ -47,5 +47,5 @@ export function useTranslation() {
     return interpolate(value, vars)
   }
 
-  return { t, language, setLanguage }
+  return { t, language, setLanguage, tenantName }
 }

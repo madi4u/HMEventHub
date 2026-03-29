@@ -8,14 +8,14 @@ import { useTranslation } from '@/i18n'
 import type { FeedEntry as FeedEntryType } from '@/types'
 
 export function FeedClient({ entries }: { entries: FeedEntryType[] }) {
-  const { t } = useTranslation()
+  const { t, tenantName } = useTranslation()
 
   return (
     <div className="flex flex-col gap-6 p-6">
       <PageHeader
         title={t('feed.title')}
         breadcrumbs={[
-          { label: t('nav.dashboard'), href: '/dashboard' },
+          { label: tenantName || 'EventHub', href: '/dashboard' },
           { label: t('feed.title') },
         ]}
       />

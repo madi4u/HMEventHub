@@ -24,14 +24,14 @@ interface EventRow {
 }
 
 export function EventsClient({ events }: { events: EventRow[] }) {
-  const { t, language } = useTranslation()
+  const { t, language, tenantName } = useTranslation()
 
   return (
     <div className="flex flex-col gap-6 p-6">
       <PageHeader
         title={t('events.title')}
         breadcrumbs={[
-          { label: t('nav.dashboard'), href: '/dashboard' },
+          { label: tenantName || 'EventHub', href: '/dashboard' },
           { label: t('events.title') },
         ]}
         actions={

@@ -20,7 +20,7 @@ interface LogisticsClientProps {
 }
 
 export function LogisticsClient({ vehicles, foodtrucks, coolingTrailers, equipment }: LogisticsClientProps) {
-  const { t } = useTranslation()
+  const { t, tenantName } = useTranslation()
 
   const statusColors: Record<string, string> = {
     ACTIVE: 'bg-green-500/20 text-green-400 border-green-500/30',
@@ -37,7 +37,7 @@ export function LogisticsClient({ vehicles, foodtrucks, coolingTrailers, equipme
       <PageHeader
         title={t('logistics.title')}
         breadcrumbs={[
-          { label: t('nav.dashboard'), href: '/dashboard' },
+          { label: tenantName || 'EventHub', href: '/dashboard' },
           { label: t('logistics.title') },
         ]}
       />

@@ -14,14 +14,14 @@ import type { Product } from '@/types'
 type ProductWithCategory = Product & { category: { name: string } | null }
 
 export function ProductsClient({ products }: { products: ProductWithCategory[] }) {
-  const { t } = useTranslation()
+  const { t, tenantName } = useTranslation()
 
   return (
     <div className="flex flex-col gap-6 p-6">
       <PageHeader
         title={t('products.title')}
         breadcrumbs={[
-          { label: t('nav.dashboard'), href: '/dashboard' },
+          { label: tenantName || 'EventHub', href: '/dashboard' },
           { label: t('products.title') },
         ]}
         actions={

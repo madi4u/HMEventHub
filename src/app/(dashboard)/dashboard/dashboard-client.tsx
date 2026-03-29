@@ -36,14 +36,17 @@ export function DashboardClient({
   nextEvents,
   openCashReportsList,
 }: DashboardClientProps) {
-  const { t, language } = useTranslation()
+  const { t, language, tenantName } = useTranslation()
 
   return (
     <div className="flex flex-col gap-6 p-6">
       <PageHeader
         title={t('dashboard.title')}
         description={t('dashboard.welcome')}
-        breadcrumbs={[{ label: t('dashboard.title') }]}
+        breadcrumbs={[
+          { label: tenantName || 'EventHub', href: '/dashboard' },
+          { label: t('dashboard.title') },
+        ]}
       />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">

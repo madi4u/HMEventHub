@@ -32,8 +32,14 @@ export default async function DashboardLayout({
 
   const typedProfile = profile as Profile
 
+  const { data: tenant } = await supabase
+    .from('tenants')
+    .select('name')
+    .eq('id', typedProfile.tenant_id)
+    .single()
+
   return (
-    <I18nProvider initialLanguage={typedProfile.preferred_language}>
+    <I18nProvider initialLanguage={typedProfile.preferred_language} tenantName={tenant?.name ?? ''}>
       <SidebarProvider>
         <AppSidebar profile={typedProfile} />
         <SidebarInset>

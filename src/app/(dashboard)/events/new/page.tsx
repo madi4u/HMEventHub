@@ -18,6 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { generateDateRange } from '@/lib/utils'
+import { useTranslation } from '@/i18n'
 
 const eventSchema = z.object({
   title: z.string().min(2, 'Mindestens 2 Zeichen erforderlich'),
@@ -49,6 +50,7 @@ const STEPS = ['Grunddaten', 'Ort & Kontakt', 'Team & Logistik', 'Hinweise']
 
 export default function NewEventPage() {
   const router = useRouter()
+  const { tenantName } = useTranslation()
   const [step, setStep] = useState(0)
   const [loading, setLoading] = useState(false)
 
@@ -141,7 +143,7 @@ export default function NewEventPage() {
       <PageHeader
         title="Neue Veranstaltung"
         breadcrumbs={[
-          { label: 'Dashboard', href: '/dashboard' },
+          { label: tenantName || 'EventHub', href: '/dashboard' },
           { label: 'Veranstaltungen', href: '/events' },
           { label: 'Neu' },
         ]}
