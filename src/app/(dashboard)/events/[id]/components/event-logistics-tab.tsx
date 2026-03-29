@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import type { Vehicle, Foodtruck, EventLogisticsAssignment } from '@/types'
+import type { Vehicle, Foodtruck, CoolingTrailer, Equipment, EventLogisticsAssignment } from '@/types'
 
 interface EventLogisticsTabProps {
   eventId: string
@@ -27,13 +27,17 @@ export function EventLogisticsTab({ eventId, tenantId, isManager }: EventLogisti
   const [logistics, setLogistics] = useState<EventLogisticsAssignment | null>(null)
   const [vehicles, setVehicles] = useState<Vehicle[]>([])
   const [foodtrucks, setFoodtrucks] = useState<Foodtruck[]>([])
+  const [coolingTrailers, setCoolingTrailers] = useState<CoolingTrailer[]>([])
+  const [equipmentList, setEquipmentList] = useState<Equipment[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [editing, setEditing] = useState(false)
 
   const [vehicleId, setVehicleId] = useState<string>('none')
   const [foodtruckId, setFoodtruckId] = useState<string>('none')
-  const [equipmentNotes, setEquipmentNotes] = useState('')
+  const [coolingTrailerId, setCoolingTrailerId] = useState<string>('none')
+  const [equipmentId, setEquipmentId] = useState<string>('none')
+  const [notes, setNotes] = useState('')
 
   const loadData = useCallback(async () => {
     const supabase = createClient()
@@ -41,24 +45,32 @@ export function EventLogisticsTab({ eventId, tenantId, isManager }: EventLogisti
       { data: logisticsData },
       { data: vehiclesData },
       { data: foodtrucksData },
+      { data: coolingData },
+      { data: equipData },
     ] = await Promise.all([
       supabase
         .from('event_logistics_assignments')
-        .select('*, vehicle:vehicles(*), foodtruck:foodtrucks(*)')
+        .select('*, vehicle:vehicles(*), foodtruck:foodtrucks(*), cooling_trailer:cooling_trailers(*), equipment:equipment(*)')
         .eq('event_id', eventId)
         .single(),
-      supabase.from('vehicles').select('*').eq('tenant_id', tenantId).eq('status', 'ACTIVE'),
-      supabase.from('foodtrucks').select('*').eq('tenant_id', tenantId),
+      supabase.from('vehicles').select('*').eq('tenant_id', tenantId).eq('status', 'ACTIVE').order('name'),
+      supabase.from('foodtrucks').select('*').eq('tenant_id', tenantId).eq('status', 'ACTIVE').order('name'),
+      supabase.from('cooling_trailers').select('*').eq('tenant_id', tenantId).eq('status', 'ACTIVE').order('name'),
+      supabase.from('equipment').select('*').eq('tenant_id', tenantId).eq('status', 'ACTIVE').order('name'),
     ])
 
     setLogistics(logisticsData as EventLogisticsAssignment | null)
     setVehicles((vehiclesData as Vehicle[]) ?? [])
     setFoodtrucks((foodtrucksData as Foodtruck[]) ?? [])
+    setCoolingTrailers((coolingData as CoolingTrailer[]) ?? [])
+    setEquipmentList((equipData as Equipment[]) ?? [])
 
     if (logisticsData) {
       setVehicleId(logisticsData.vehicle_id ?? 'none')
       setFoodtruckId(logisticsData.foodtruck_id ?? 'none')
-      setEquipmentNotes(logisticsData.equipment_notes ?? '')
+      setCoolingTrailerId(logisticsData.cooling_trailer_id ?? 'none')
+      setEquipmentId(logisticsData.equipment_id ?? 'none')
+      setNotes(logisticsData.equipment_notes ?? '')
     }
 
     setLoading(false)
@@ -77,14 +89,13 @@ export function EventLogisticsTab({ eventId, tenantId, isManager }: EventLogisti
         tenant_id: tenantId,
         vehicle_id: vehicleId === 'none' ? null : vehicleId,
         foodtruck_id: foodtruckId === 'none' ? null : foodtruckId,
-        equipment_notes: equipmentNotes || null,
+        cooling_trailer_id: coolingTrailerId === 'none' ? null : coolingTrailerId,
+        equipment_id: equipmentId === 'none' ? null : equipmentId,
+        equipment_notes: notes.trim() || null,
       }
 
       if (logistics) {
-        await supabase
-          .from('event_logistics_assignments')
-          .update(payload)
-          .eq('id', logistics.id)
+        await supabase.from('event_logistics_assignments').update(payload).eq('id', logistics.id)
       } else {
         await supabase.from('event_logistics_assignments').insert(payload)
       }
@@ -109,8 +120,10 @@ export function EventLogisticsTab({ eventId, tenantId, isManager }: EventLogisti
     )
   }
 
-  const vehicle = vehicleId !== 'none' ? vehicles.find((v) => v.id === vehicleId) : undefined
-  const foodtruck = foodtruckId !== 'none' ? foodtrucks.find((f) => f.id === foodtruckId) : undefined
+  const assignedVehicle = vehicleId !== 'none' ? vehicles.find((v) => v.id === vehicleId) : undefined
+  const assignedFoodtruck = foodtruckId !== 'none' ? foodtrucks.find((f) => f.id === foodtruckId) : undefined
+  const assignedCooling = coolingTrailerId !== 'none' ? coolingTrailers.find((c) => c.id === coolingTrailerId) : undefined
+  const assignedEquipment = equipmentId !== 'none' ? equipmentList.find((e) => e.id === equipmentId) : undefined
 
   return (
     <Card className="border-border">
@@ -125,46 +138,82 @@ export function EventLogisticsTab({ eventId, tenantId, isManager }: EventLogisti
       <CardContent className="space-y-4">
         {editing ? (
           <>
-            <div className="space-y-2">
-              <Label>Fahrzeug</Label>
-              <Select value={vehicleId} onValueChange={setVehicleId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Kein Fahrzeug" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">Kein Fahrzeug</SelectItem>
-                  {vehicles.map((v) => (
-                    <SelectItem key={v.id} value={v.id}>
-                      {v.name} {v.license_plate ? `(${v.license_plate})` : ''}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Fahrzeug</Label>
+                <Select value={vehicleId} onValueChange={setVehicleId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Kein Fahrzeug" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">— Kein Fahrzeug</SelectItem>
+                    {vehicles.map((v) => (
+                      <SelectItem key={v.id} value={v.id}>
+                        {v.name}{v.license_plate ? ` (${v.license_plate})` : ''}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Foodtruck</Label>
+                <Select value={foodtruckId} onValueChange={setFoodtruckId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Kein Foodtruck" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">— Kein Foodtruck</SelectItem>
+                    {foodtrucks.map((f) => (
+                      <SelectItem key={f.id} value={f.id}>
+                        {f.name}{f.license_plate ? ` (${f.license_plate})` : ''}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Kühlwagen</Label>
+                <Select value={coolingTrailerId} onValueChange={setCoolingTrailerId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Kein Kühlwagen" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">— Kein Kühlwagen</SelectItem>
+                    {coolingTrailers.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.name}{c.license_plate ? ` (${c.license_plate})` : ''}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Equipment</Label>
+                <Select value={equipmentId} onValueChange={setEquipmentId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Kein Equipment" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">— Kein Equipment</SelectItem>
+                    {equipmentList.map((e) => (
+                      <SelectItem key={e.id} value={e.id}>
+                        {e.name}{e.category ? ` (${e.category})` : ''}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             <div className="space-y-2">
-              <Label>Foodtruck</Label>
-              <Select value={foodtruckId} onValueChange={setFoodtruckId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Kein Foodtruck" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">Kein Foodtruck</SelectItem>
-                  {foodtrucks.map((f) => (
-                    <SelectItem key={f.id} value={f.id}>
-                      {f.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Equipment-Hinweise</Label>
+              <Label>Notizen</Label>
               <Textarea
-                value={equipmentNotes}
-                onChange={(e) => setEquipmentNotes(e.target.value)}
-                placeholder="Zusätzliche Ausrüstung, Hinweise..."
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Zusätzliche Hinweise zur Logistik..."
                 rows={3}
               />
             </div>
@@ -180,29 +229,47 @@ export function EventLogisticsTab({ eventId, tenantId, isManager }: EventLogisti
             </div>
           </>
         ) : (
-          <div className="space-y-3">
+          <div className="grid grid-cols-2 gap-4">
             <div>
               <p className="text-sm font-medium text-muted-foreground">Fahrzeug</p>
               <p className="text-sm mt-1">
-                {vehicle
-                  ? `${vehicle.name}${vehicle.license_plate ? ` (${vehicle.license_plate})` : ''}`
-                  : 'Kein Fahrzeug zugewiesen'}
+                {assignedVehicle
+                  ? `${assignedVehicle.name}${assignedVehicle.license_plate ? ` (${assignedVehicle.license_plate})` : ''}`
+                  : <span className="text-muted-foreground">—</span>}
               </p>
             </div>
             <div>
               <p className="text-sm font-medium text-muted-foreground">Foodtruck</p>
-              <p className="text-sm mt-1">{foodtruck ? foodtruck.name : 'Kein Foodtruck zugewiesen'}</p>
+              <p className="text-sm mt-1">
+                {assignedFoodtruck
+                  ? `${assignedFoodtruck.name}${assignedFoodtruck.license_plate ? ` (${assignedFoodtruck.license_plate})` : ''}`
+                  : <span className="text-muted-foreground">—</span>}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">Kühlwagen</p>
+              <p className="text-sm mt-1">
+                {assignedCooling
+                  ? `${assignedCooling.name}${assignedCooling.license_plate ? ` (${assignedCooling.license_plate})` : ''}`
+                  : <span className="text-muted-foreground">—</span>}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">Equipment</p>
+              <p className="text-sm mt-1">
+                {assignedEquipment
+                  ? `${assignedEquipment.name}${assignedEquipment.category ? ` (${assignedEquipment.category})` : ''}`
+                  : <span className="text-muted-foreground">—</span>}
+              </p>
             </div>
             {logistics?.equipment_notes && (
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Equipment-Hinweise</p>
-                <p className="text-sm mt-1 text-muted-foreground whitespace-pre-wrap">
-                  {logistics.equipment_notes}
-                </p>
+              <div className="col-span-2">
+                <p className="text-sm font-medium text-muted-foreground">Notizen</p>
+                <p className="text-sm mt-1 text-muted-foreground whitespace-pre-wrap">{logistics.equipment_notes}</p>
               </div>
             )}
             {!logistics && (
-              <p className="text-sm text-muted-foreground">Keine Logistik zugewiesen</p>
+              <p className="col-span-2 text-sm text-muted-foreground">Keine Logistik zugewiesen</p>
             )}
           </div>
         )}

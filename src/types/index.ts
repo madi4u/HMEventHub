@@ -193,12 +193,14 @@ export interface EventLogisticsAssignment {
   vehicle_id: string | null
   foodtruck_id: string | null
   cooling_trailer_id: string | null
+  equipment_id: string | null
   equipment_notes: string | null
   created_at: string
   // Joined
   vehicle?: Vehicle
   foodtruck?: Foodtruck
   cooling_trailer?: CoolingTrailer
+  equipment?: Equipment
 }
 
 export interface ProductCategory {
