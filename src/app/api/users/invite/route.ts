@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
 
   // Invite user via Supabase Auth
   const { data: invited, error: inviteError } = await admin.auth.admin.inviteUserByEmail(email, {
-    redirectTo: `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://hm-eventhub.vercel.app'}/update-password`,
+    redirectTo: `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://hm-eventhub.vercel.app'}/auth/callback?next=/update-password`,
     data: { full_name },
   })
 
