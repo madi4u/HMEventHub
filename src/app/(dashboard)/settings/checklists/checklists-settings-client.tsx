@@ -55,6 +55,8 @@ export function ChecklistSettingsClient({ templates: initialTemplates, tenantId 
   const [newName, setNewName] = useState('')
   const [newDescription, setNewDescription] = useState('')
   const [newCategory, setNewCategory] = useState('GENERAL')
+  const [newPdfFile, setNewPdfFile] = useState<File | null>(null)
+  const [dragOver, setDragOver] = useState(false)
   const [creating, setCreating] = useState(false)
 
   // New item dialog
@@ -79,10 +81,24 @@ export function ChecklistSettingsClient({ templates: initialTemplates, tenantId 
         .select('*, items:checklist_template_items(*)')
         .single()
       if (error || !data) { toast.error('Fehler beim Erstellen'); return }
-      setTemplates((prev) => [data as TemplateWithItems, ...prev])
+
+      let pdfUrl: string | null = null
+      if (newPdfFile) {
+        const path = `${tenantId}/${data.id}/${newPdfFile.name}`
+        const { error: uploadError } = await supabase.storage
+          .from('checklist-pdfs')
+          .upload(path, newPdfFile, { upsert: true })
+        if (!uploadError) {
+          const { data: urlData } = supabase.storage.from('checklist-pdfs').getPublicUrl(path)
+          pdfUrl = urlData.publicUrl
+          await supabase.from('checklist_templates').update({ pdf_url: pdfUrl }).eq('id', data.id)
+        }
+      }
+
+      setTemplates((prev) => [{ ...(data as TemplateWithItems), pdf_url: pdfUrl }, ...prev])
       toast.success('Vorlage erstellt')
       setNewDialogOpen(false)
-      setNewName(''); setNewDescription(''); setNewCategory('GENERAL')
+      setNewName(''); setNewDescription(''); setNewCategory('GENERAL'); setNewPdfFile(null)
     } finally { setCreating(false) }
   }
 
@@ -186,8 +202,66 @@ export function ChecklistSettingsClient({ templates: initialTemplates, tenantId 
                     </SelectContent>
                   </Select>
                 </div>
+                {/* PDF Drag & Drop */}
+                <div className="space-y-2">
+                  <Label>PDF-Vorlage (optional)</Label>
+                  <div
+                    className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-colors cursor-pointer ${
+                      dragOver
+                        ? 'border-primary bg-primary/10'
+                        : newPdfFile
+                        ? 'border-green-500/50 bg-green-500/10'
+                        : 'border-border hover:border-muted-foreground/50'
+                    }`}
+                    onDragOver={(e) => { e.preventDefault(); setDragOver(true) }}
+                    onDragLeave={() => setDragOver(false)}
+                    onDrop={(e) => {
+                      e.preventDefault()
+                      setDragOver(false)
+                      const file = e.dataTransfer.files?.[0]
+                      if (file && file.type === 'application/pdf') {
+                        setNewPdfFile(file)
+                      } else {
+                        toast.error('Nur PDF-Dateien erlaubt')
+                      }
+                    }}
+                    onClick={() => document.getElementById('new-pdf-input')?.click()}
+                  >
+                    <input
+                      id="new-pdf-input"
+                      type="file"
+                      accept="application/pdf"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0]
+                        if (file) setNewPdfFile(file)
+                      }}
+                    />
+                    {newPdfFile ? (
+                      <div className="flex items-center justify-center gap-2">
+                        <FileText className="h-5 w-5 text-green-400" />
+                        <span className="text-sm font-medium text-green-400">{newPdfFile.name}</span>
+                        <button
+                          className="ml-2 text-muted-foreground hover:text-destructive text-xs"
+                          onClick={(e) => { e.stopPropagation(); setNewPdfFile(null) }}
+                        >
+                          ✕ Entfernen
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center gap-2">
+                        <Upload className="h-8 w-8 text-muted-foreground" />
+                        <p className="text-sm text-muted-foreground">
+                          PDF hier ablegen oder <span className="text-primary underline">klicken</span>
+                        </p>
+                        <p className="text-xs text-muted-foreground">Nur PDF, max. 50 MB</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
                 <div className="flex justify-end gap-2">
-                  <Button variant="outline" onClick={() => setNewDialogOpen(false)}>Abbrechen</Button>
+                  <Button variant="outline" onClick={() => { setNewDialogOpen(false); setNewPdfFile(null) }}>Abbrechen</Button>
                   <Button onClick={handleCreateTemplate} disabled={creating}>
                     {creating ? 'Erstellen...' : 'Erstellen'}
                   </Button>
