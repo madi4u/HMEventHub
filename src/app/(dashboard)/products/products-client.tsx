@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { Plus, ShoppingBag, Loader2 } from 'lucide-react'
+import { Plus, ShoppingBag, Loader2, Check, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 import { PageHeader } from '@/components/layout/page-header'
@@ -35,15 +35,21 @@ interface Props {
 
 const EMPTY_FORM = { name: '', category_id: 'none', unit: '', notes: '', is_active: true }
 
-export function ProductsClient({ products: initialProducts, categories, tenantId }: Props) {
+export function ProductsClient({ products: initialProducts, categories: initialCategories, tenantId }: Props) {
   const { t, tenantName } = useTranslation()
   const router = useRouter()
 
   const [products, setProducts] = useState(initialProducts)
+  const [categories, setCategories] = useState(initialCategories)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editProduct, setEditProduct] = useState<ProductWithCategory | null>(null)
   const [form, setForm] = useState(EMPTY_FORM)
   const [saving, setSaving] = useState(false)
+
+  // Inline category creation
+  const [newCatName, setNewCatName] = useState('')
+  const [addingCat, setAddingCat] = useState(false)
+  const [savingCat, setSavingCat] = useState(false)
 
   const openCreate = () => {
     setEditProduct(null)
@@ -72,6 +78,28 @@ export function ProductsClient({ products: initialProducts, categories, tenantId
       .order('name', { ascending: true })
     if (data) setProducts(data as ProductWithCategory[])
   }, [tenantId])
+
+  async function handleSaveCategory() {
+    if (!newCatName.trim()) return
+    setSavingCat(true)
+    try {
+      const supabase = createClient()
+      const { data, error } = await supabase
+        .from('product_categories')
+        .insert({ name: newCatName.trim(), tenant_id: tenantId, sort_order: categories.length })
+        .select()
+        .single()
+      if (error) { toast.error('Fehler beim Anlegen'); return }
+      const newCat = data as ProductCategory
+      setCategories((prev) => [...prev, newCat])
+      setForm((f) => ({ ...f, category_id: newCat.id }))
+      setNewCatName('')
+      setAddingCat(false)
+      toast.success('Kategorie angelegt')
+    } finally {
+      setSavingCat(false)
+    }
+  }
 
   async function handleSave() {
     if (!form.name.trim() || !form.unit.trim()) {
@@ -199,7 +227,10 @@ export function ProductsClient({ products: initialProducts, categories, tenantId
 
             <div className="space-y-1.5">
               <Label>Kategorie</Label>
-              <Select value={form.category_id} onValueChange={(v) => setForm({ ...form, category_id: v })}>
+              <Select value={form.category_id} onValueChange={(v) => {
+                if (v === '__new__') { setAddingCat(true); return }
+                setForm({ ...form, category_id: v })
+              }}>
                 <SelectTrigger>
                   <SelectValue placeholder="Keine Kategorie" />
                 </SelectTrigger>
@@ -208,8 +239,35 @@ export function ProductsClient({ products: initialProducts, categories, tenantId
                   {categories.map((c) => (
                     <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
                   ))}
+                  <SelectItem value="__new__" className="text-primary font-medium">
+                    <span className="flex items-center gap-1.5">
+                      <Plus className="h-3.5 w-3.5" />
+                      Neue Kategorie anlegen…
+                    </span>
+                  </SelectItem>
                 </SelectContent>
               </Select>
+
+              {addingCat && (
+                <div className="flex gap-2 mt-1">
+                  <Input
+                    autoFocus
+                    placeholder="Kategoriename"
+                    value={newCatName}
+                    onChange={(e) => setNewCatName(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') handleSaveCategory()
+                      if (e.key === 'Escape') { setAddingCat(false); setNewCatName('') }
+                    }}
+                  />
+                  <Button size="icon" variant="outline" onClick={handleSaveCategory} disabled={savingCat || !newCatName.trim()}>
+                    {savingCat ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+                  </Button>
+                  <Button size="icon" variant="ghost" onClick={() => { setAddingCat(false); setNewCatName('') }}>
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
             </div>
 
             <div className="space-y-1.5">
