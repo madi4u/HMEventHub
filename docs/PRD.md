@@ -1,29 +1,68 @@
-# Product Requirements Document
+# Product Requirements Document — H+M EventHub
 
 ## Vision
-_Describe what you are building and why._
+H+M EventHub ist eine mandantenfähige Web-App für Catering- und Foodtruck-Unternehmen. Sie ersetzt Papier, Excel und Ausdrucke durch eine zentrale digitale Plattform: Veranstaltungen planen, Teams einteilen, Kassenblätter digital abschließen, Stunden erfassen und Mitarbeiter onboarden — alles in einer App, auf dem Smartphone.
 
 ## Target Users
-_Who will use this product? Describe their needs and pain points._
+
+### Chef / Owner (Primär)
+- Verantwortlich für Veranstaltungsplanung, Team-Einteilung und Abrechnung
+- Braucht jederzeit Überblick über laufende Events, Umsätze, offene Kassenblätter
+- Aktueller Pain Point: Papier-Kassenblätter, Excel-Stundenlisten, ausgedruckte Infomappen
+
+### Standleiter (Sekundär)
+- Leitet ein Event vor Ort, koordiniert das Team
+- Braucht schnellen Zugriff auf Veranstaltungsinfos, kann Checklisten und Kassenblatt abschließen
+
+### Mitarbeiter / Employee (Primär-Endnutzer)
+- 15+ Mitarbeiter, z.T. geringer Tech-Affinität, mehrsprachig (DE/EN/ES)
+- Nutzt App auf dem Smartphone: einstempeln, Inventur erfassen, Kassenblatt ausfüllen, Feed nutzen
+- Darf nur eigene zugewiesene Veranstaltungen sehen
+
+### Tenant Admin (Verwaltung)
+- Verwaltet Benutzer, Rollen und Stammdaten innerhalb des Mandanten
 
 ## Core Features (Roadmap)
 
-| Priority | Feature | Status |
-|----------|---------|--------|
-| P0 (MVP) | _Feature 1_ | Planned |
-| P0 (MVP) | _Feature 2_ | Planned |
-| P1 | _Feature 3_ | Planned |
-| P2 | _Feature 4_ | Planned |
+| Priorität | Feature | ID | Status |
+|-----------|---------|-----|--------|
+| P0 (MVP) | Auth & Rollenmodell | PROJ-1 | Planned |
+| P0 (MVP) | Mandanten & Benutzerverwaltung | PROJ-2 | Planned |
+| P0 (MVP) | Veranstaltungen CRUD | PROJ-3 | Planned |
+| P0 (MVP) | Veranstaltungsdetailseite | PROJ-4 | Planned |
+| P0 (MVP) | Mitarbeiter-Zuordnung zu Events | PROJ-5 | Planned |
+| P0 (MVP) | Meine Veranstaltungen (Mitarbeiter) | PROJ-6 | Planned |
+| P0 (MVP) | Kassenblatt (Tages-Kassenblatt digital) | PROJ-7 | Planned |
+| P0 (MVP) | Zeiterfassung (Ein-/Ausstempeln) | PROJ-8 | Planned |
+| P0 (MVP) | Onboarding-Modul | PROJ-9 | Planned |
+| P1 | Master-Dashboard | PROJ-10 | Planned |
+| P1 | Inventurmodul | PROJ-11 | Planned |
+| P1 | Kontrollblätter / Checklisten | PROJ-12 | Planned |
+| P1 | Feed / Dokumentations-Chat | PROJ-13 | Planned |
+| P1 | PDF-Export Veranstaltung | PROJ-14 | Planned |
+| P1 | PDF-Export Kassenblatt | PROJ-15 | Planned |
+| P2 | Produkte / Artikelstamm | PROJ-16 | Planned |
+| P2 | Logistik-Stammdaten | PROJ-17 | Planned |
+| P2 | Mehrsprachigkeit Mitarbeiterbereich | PROJ-18 | Planned |
+| P2 | Superadmin-Bereich | PROJ-19 | Planned |
+| P2 | Dokumentenverwaltung pro Event | PROJ-20 | Planned |
 
 ## Success Metrics
-_How will you measure success? (e.g., user signups, retention, task completion rate)_
+- **Kein Papier mehr auf Events:** Kassenblatt, Stundenzettel und Checklisten laufen vollständig digital
+- **Weniger Abrechnungsfehler:** Automatische Summenberechnung, keine handschriftlichen Fehler
+- **Mitarbeiter-Selbstbedienung:** App ohne Schulung nutzbar, auch für Tech-ferne Mitarbeiter
+- **Chef-Überblick jederzeit:** Status aller laufenden Events auf dem Handy in <30 Sekunden abrufbar
 
 ## Constraints
-_Budget, timeline, technical limitations, team size._
+- Team: 1 Entwickler (KI-gestützt mit Claude Code)
+- Deployment: Vercel (Frontend) + Supabase (Backend)
+- Geräte: Mobile-first (Smartphone), aber auch Desktop für Chef-Bereich
+- Sprachen: Mitarbeiterbereich DE / EN / ES
+- Keine externen Kassensystem-Schnittstellen
 
-## Non-Goals
-_What are you explicitly NOT building in this version?_
-
----
-
-Use `/requirements` to create detailed feature specifications for each item in the roadmap above.
+## Non-Goals (Version 1)
+- Keine Kassensystem-Anbindung (Orderbird, SumUp etc.)
+- Keine Lohnberechnung aus Zeiterfassungsdaten
+- Keine Kundenverwaltung / CRM / Angebotswesen
+- Kein vollständiges Warenwirtschaftssystem mit Bestellungen und Lieferanten
+- Kein öffentliches Buchungsportal für Veranstalterkunden
