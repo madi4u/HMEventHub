@@ -163,6 +163,8 @@ export function LogisticsClient({ vehicles, foodtrucks, coolingTrailers, equipme
                 <TableHeader>
                   <TableRow className="border-border">
                     <TableHead>{t('common.name')}</TableHead>
+                    <TableHead>Kennzeichen</TableHead>
+                    <TableHead>Hersteller</TableHead>
                     <TableHead>{t('common.status')}</TableHead>
                     <TableHead>Notizen</TableHead>
                   </TableRow>
@@ -170,7 +172,7 @@ export function LogisticsClient({ vehicles, foodtrucks, coolingTrailers, equipme
                 <TableBody>
                   {coolingTrailers.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={3} className="text-center py-8 text-muted-foreground">
+                      <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
                         {t('logistics.noCoolingTrailers')}
                       </TableCell>
                     </TableRow>
@@ -178,6 +180,8 @@ export function LogisticsClient({ vehicles, foodtrucks, coolingTrailers, equipme
                     coolingTrailers.map((c) => (
                       <TableRow key={c.id} className="border-border">
                         <TableCell className="font-medium">{c.name}</TableCell>
+                        <TableCell className="text-muted-foreground">{c.license_plate ?? '—'}</TableCell>
+                        <TableCell className="text-muted-foreground">{c.manufacturer ?? '—'}</TableCell>
                         <TableCell>
                           <Badge variant="outline" className={`text-xs ${statusColors[c.status] ?? ''}`}>
                             {statusLabel[c.status] ?? c.status}

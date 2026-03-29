@@ -169,6 +169,8 @@ export interface CoolingTrailer {
   id: string
   tenant_id: string
   name: string
+  license_plate: string | null
+  manufacturer: string | null
   status: string
   notes: string | null
   created_at: string

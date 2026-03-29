@@ -51,6 +51,10 @@ export function AddLogisticsDialog({ type, tenantId }: Props) {
   const [manufacturer, setManufacturer] = useState('')
   const [isTruck, setIsTruck] = useState(true)
 
+  // cooling trailers
+  const [ctLicensePlate, setCtLicensePlate] = useState('')
+  const [ctManufacturer, setCtManufacturer] = useState('')
+
   // equipment
   const [category, setCategory] = useState('')
 
@@ -64,6 +68,8 @@ export function AddLogisticsDialog({ type, tenantId }: Props) {
     setFtLicensePlate('')
     setManufacturer('')
     setIsTruck(true)
+    setCtLicensePlate('')
+    setCtManufacturer('')
     setCategory('')
   }
 
@@ -91,6 +97,12 @@ export function AddLogisticsDialog({ type, tenantId }: Props) {
           license_plate: ftLicensePlate.trim() || null,
           manufacturer: manufacturer.trim() || null,
           is_truck: isTruck,
+        }
+      } else if (type === 'cooling_trailers') {
+        payload = {
+          ...payload,
+          license_plate: ctLicensePlate.trim() || null,
+          manufacturer: ctManufacturer.trim() || null,
         }
       } else if (type === 'equipment') {
         payload = { ...payload, category: category.trim() || null }
@@ -184,6 +196,19 @@ export function AddLogisticsDialog({ type, tenantId }: Props) {
                 </Label>
               </div>
             </>
+          )}
+
+          {type === 'cooling_trailers' && (
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Kennzeichen</Label>
+                <Input placeholder="HB-KW 001" value={ctLicensePlate} onChange={(e) => setCtLicensePlate(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label>Hersteller</Label>
+                <Input placeholder="z.B. Schmitz, Krone" value={ctManufacturer} onChange={(e) => setCtManufacturer(e.target.value)} />
+              </div>
+            </div>
           )}
 
           {type === 'equipment' && (
