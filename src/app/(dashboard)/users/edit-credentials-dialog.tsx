@@ -18,6 +18,7 @@ import {
   DialogTrigger,
   DialogFooter,
 } from '@/components/ui/dialog'
+import { useTranslation } from '@/i18n'
 
 const schema = z.object({
   email: z.string().email('Ungültige E-Mail').or(z.literal('')),
@@ -37,6 +38,7 @@ interface Props {
 
 export function EditCredentialsDialog({ profileId, userName, currentEmail }: Props) {
   const router = useRouter()
+  const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
 
@@ -76,29 +78,29 @@ export function EditCredentialsDialog({ profileId, userName, currentEmail }: Pro
       <DialogTrigger asChild>
         <Button variant="ghost" size="sm">
           <KeyRound className="h-3.5 w-3.5 mr-1" />
-          Zugangsdaten
+          {t('common.credentials')}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-sm">
         <DialogHeader>
-          <DialogTitle>Zugangsdaten — {userName}</DialogTitle>
+          <DialogTitle>{t('common.credentials')} — {userName}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-2">
           <div className="space-y-2">
-            <Label>E-Mail-Adresse</Label>
+            <Label>{t('common.email')}</Label>
             <Input type="email" {...register('email')} disabled={loading} />
             {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
           </div>
           <div className="space-y-2">
-            <Label>Neues Passwort</Label>
+            <Label>{t('settings.newPassword')}</Label>
             <Input type="password" placeholder="Leer lassen = nicht ändern" {...register('password')} disabled={loading} />
             {errors.password && <p className="text-sm text-destructive">{errors.password.message}</p>}
             <p className="text-xs text-muted-foreground">Mindestens 8 Zeichen</p>
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>Abbrechen</Button>
+            <Button type="button" variant="outline" onClick={() => setOpen(false)}>{t('common.cancel')}</Button>
             <Button type="submit" disabled={loading}>
-              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Speichern'}
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : t('common.save')}
             </Button>
           </DialogFooter>
         </form>

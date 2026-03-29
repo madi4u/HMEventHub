@@ -1,35 +1,40 @@
+'use client'
+
 import Link from 'next/link'
-import { User, Lock, Globe, Bell } from 'lucide-react'
+import { User, Lock, Globe } from 'lucide-react'
 import { PageHeader } from '@/components/layout/page-header'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-
-const settingsSections = [
-  {
-    title: 'Profil',
-    description: 'Name, Telefon und Profilbild verwalten',
-    href: '/settings/profile',
-    icon: User,
-  },
-  {
-    title: 'Sicherheit',
-    description: 'Passwort und Sitzungen verwalten',
-    href: '/settings/security',
-    icon: Lock,
-  },
-  {
-    title: 'Sprache',
-    description: 'Bevorzugte Sprache auswählen',
-    href: '/settings/language',
-    icon: Globe,
-  },
-]
+import { useTranslation } from '@/i18n'
 
 export default function SettingsPage() {
+  const { t } = useTranslation()
+
+  const settingsSections = [
+    {
+      title: t('settings.profile'),
+      description: t('settings.manageProfile'),
+      href: '/settings/profile',
+      icon: User,
+    },
+    {
+      title: t('settings.security'),
+      description: t('settings.manageSecurity'),
+      href: '/settings/security',
+      icon: Lock,
+    },
+    {
+      title: t('settings.language'),
+      description: t('settings.manageLanguage'),
+      href: '/settings/language',
+      icon: Globe,
+    },
+  ]
+
   return (
     <div className="flex flex-col gap-6 p-6">
       <PageHeader
-        title="Einstellungen"
-        breadcrumbs={[{ label: 'Einstellungen' }]}
+        title={t('settings.title')}
+        breadcrumbs={[{ label: t('settings.title') }]}
       />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

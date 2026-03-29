@@ -20,6 +20,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
+import { useTranslation } from '@/i18n'
 
 const schema = z.object({
   email: z.string().email('Ungültige E-Mail-Adresse'),
@@ -32,6 +33,7 @@ type FormData = z.infer<typeof schema>
 
 export function InviteUserDialog() {
   const router = useRouter()
+  const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
 
@@ -71,66 +73,66 @@ export function InviteUserDialog() {
       <DialogTrigger asChild>
         <Button size="sm">
           <Plus className="h-4 w-4 mr-1" />
-          Benutzer einladen
+          {t('users.invite')}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Benutzer einladen</DialogTitle>
+          <DialogTitle>{t('users.invite')}</DialogTitle>
           <DialogDescription>
             Der Benutzer erhält eine E-Mail mit einem Link zum Festlegen seines Passworts.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="full_name">Name *</Label>
+            <Label htmlFor="full_name">{t('common.name')} *</Label>
             <Input id="full_name" {...register('full_name')} placeholder="Max Mustermann" disabled={loading} />
             {errors.full_name && <p className="text-sm text-destructive">{errors.full_name.message}</p>}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="email">E-Mail *</Label>
+            <Label htmlFor="email">{t('common.email')} *</Label>
             <Input id="email" type="email" {...register('email')} placeholder="max@example.com" disabled={loading} />
             {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
           </div>
 
           <div className="space-y-2">
-            <Label>Rolle *</Label>
+            <Label>{t('common.role')} *</Label>
             <Select defaultValue="EMPLOYEE" onValueChange={(v) => setValue('role', v as FormData['role'])}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="OWNER">Inhaber</SelectItem>
-                <SelectItem value="EVENT_MANAGER">Veranstaltungsleiter</SelectItem>
-                <SelectItem value="STANDLEITER">Standleiter</SelectItem>
-                <SelectItem value="EMPLOYEE">Mitarbeiter</SelectItem>
-                <SelectItem value="READ_ONLY">Lesezugriff</SelectItem>
-                <SelectItem value="TENANT_ADMIN">Mandant-Admin</SelectItem>
+                <SelectItem value="OWNER">{t('roles.OWNER')}</SelectItem>
+                <SelectItem value="EVENT_MANAGER">{t('roles.EVENT_MANAGER')}</SelectItem>
+                <SelectItem value="STANDLEITER">{t('roles.STANDLEITER')}</SelectItem>
+                <SelectItem value="EMPLOYEE">{t('roles.EMPLOYEE')}</SelectItem>
+                <SelectItem value="READ_ONLY">{t('roles.READ_ONLY')}</SelectItem>
+                <SelectItem value="TENANT_ADMIN">{t('roles.TENANT_ADMIN')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <div className="space-y-2">
-            <Label>Sprache</Label>
+            <Label>{t('common.language')}</Label>
             <Select defaultValue="de" onValueChange={(v) => setValue('preferred_language', v as FormData['preferred_language'])}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="de">🇩🇪 Deutsch</SelectItem>
-                <SelectItem value="en">🇬🇧 English</SelectItem>
-                <SelectItem value="es">🇪🇸 Español</SelectItem>
+                <SelectItem value="de">🇩🇪 {t('settings.german')}</SelectItem>
+                <SelectItem value="en">🇬🇧 {t('settings.english')}</SelectItem>
+                <SelectItem value="es">🇪🇸 {t('settings.spanish')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={loading}>
-              Abbrechen
+              {t('common.cancel')}
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Einladen...</> : 'Einladung senden'}
+              {loading ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />{t('common.loading')}</> : t('users.invite')}
             </Button>
           </DialogFooter>
         </form>
