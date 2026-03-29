@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatDate } from '@/lib/utils'
 import { TenantEditForm } from './tenant-edit-form'
 import { TenantUsersTable } from './tenant-users-table'
+import { DeleteTenantButton } from './delete-tenant-button'
 import { CalendarDays, Users } from 'lucide-react'
 
 export default async function TenantDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -45,11 +46,12 @@ export default async function TenantDetailPage({ params }: { params: Promise<{ i
           { label: tenant.name },
         ]}
         actions={
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <Badge variant="outline" className={`text-xs ${statusColors[tenant.status] ?? ''}`}>
               {statusLabels[tenant.status] ?? tenant.status}
             </Badge>
             <span className="text-xs text-muted-foreground">Erstellt: {formatDate(tenant.created_at)}</span>
+            <DeleteTenantButton tenantId={id} tenantName={tenant.name} />
           </div>
         }
       />

@@ -126,7 +126,11 @@ export default async function SuperadminPage() {
                   const stats = tenantStats.find((s) => s.tenantId === tenant.id)
                   return (
                     <TableRow key={tenant.id} className="border-border">
-                      <TableCell className="font-medium">{tenant.name}</TableCell>
+                      <TableCell className="font-medium">
+                        <Link href={`/superadmin/tenants/${tenant.id}`} className="hover:underline">
+                          {tenant.name}
+                        </Link>
+                      </TableCell>
                       <TableCell className="text-muted-foreground font-mono text-xs">{tenant.slug}</TableCell>
                       <TableCell>
                         <Badge
