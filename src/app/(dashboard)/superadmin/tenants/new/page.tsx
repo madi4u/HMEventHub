@@ -58,7 +58,11 @@ export default function NewTenantPage() {
         toast.error(json.error ?? 'Fehler beim Erstellen des Mandanten')
         return
       }
-      toast.success(`Mandant erstellt und Einladung an ${data.admin_email} gesendet`)
+      if (json.warning) {
+        toast.warning(json.warning)
+      } else {
+        toast.success(`Mandant erstellt und Einladung an ${data.admin_email} gesendet`)
+      }
       router.push('/superadmin')
     } catch {
       toast.error('Unerwarteter Fehler')

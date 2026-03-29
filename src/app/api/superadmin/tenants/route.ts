@@ -42,8 +42,13 @@ export async function POST(request: NextRequest) {
   })
 
   if (inviteError) {
-    await admin.from('tenants').delete().eq('id', tenant.id)
-    return NextResponse.json({ error: 'Mandant erstellt, aber Einladung fehlgeschlagen: ' + inviteError.message }, { status: 400 })
+    // Tenant was created successfully — don't roll back.
+    // Admin can invite the user manually from the tenant detail page.
+    return NextResponse.json({
+      success: true,
+      tenant,
+      warning: `Mandant wurde angelegt, aber die Einladungs-E-Mail konnte nicht gesendet werden: ${inviteError.message}. Bitte den Benutzer manuell über die Mandantenseite einladen.`,
+    })
   }
 
   // Set profile role + tenant
