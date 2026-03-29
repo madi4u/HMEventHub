@@ -47,17 +47,18 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: inviteError.message }, { status: 400 })
   }
 
-  // Update the profile created by the trigger with role and tenant
+  // Upsert profile — trigger may not have fired yet so update could miss
   const { error: profileError } = await admin
     .from('profiles')
-    .update({
+    .upsert({
+      user_id: invited.user.id,
+      email,
       full_name,
       role,
       preferred_language,
       tenant_id: profile.tenant_id,
       is_active: true,
-    })
-    .eq('user_id', invited.user.id)
+    }, { onConflict: 'user_id' })
 
   if (profileError) {
     return NextResponse.json({ error: 'Benutzer eingeladen, aber Profil konnte nicht aktualisiert werden: ' + profileError.message }, { status: 500 })

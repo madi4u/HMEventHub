@@ -56,13 +56,15 @@ export async function POST(request: NextRequest) {
     })
   }
 
-  // Set profile role + tenant
-  await admin.from('profiles').update({
+  // Upsert profile — trigger may not have fired yet so update could miss
+  await admin.from('profiles').upsert({
+    user_id: invited.user.id,
+    email: admin_email,
     full_name: admin_name,
     role: 'TENANT_ADMIN',
     tenant_id: tenant.id,
     is_active: true,
-  }).eq('user_id', invited.user.id)
+  }, { onConflict: 'user_id' })
 
   return NextResponse.json({ success: true, tenant })
 }
