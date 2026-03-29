@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
     user_id: invited.user.id,
     email: admin_email,
     full_name: admin_name,
-    role: 'TENANT_ADMIN',
+    role: 'OWNER',
     tenant_id: tenant.id,
     is_active: true,
   }, { onConflict: 'user_id' })
