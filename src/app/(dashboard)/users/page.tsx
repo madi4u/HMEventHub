@@ -5,6 +5,7 @@ import { PageHeader } from '@/components/layout/page-header'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { InviteUserDialog } from './invite-dialog'
+import { EditCredentialsDialog } from './edit-credentials-dialog'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Card, CardContent } from '@/components/ui/card'
 import {
@@ -124,7 +125,13 @@ export default async function UsersPage() {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button variant="ghost" size="sm">Bearbeiten</Button>
+                      {['EVENT_MANAGER', 'STANDLEITER', 'EMPLOYEE', 'READ_ONLY'].includes(u.role) && (
+                        <EditCredentialsDialog
+                          profileId={u.id}
+                          userName={u.full_name}
+                          currentEmail={u.email}
+                        />
+                      )}
                     </TableCell>
                   </TableRow>
                 ))
