@@ -1,8 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { ProductsClient } from './products-client'
-import { isManagerRole } from '@/lib/utils'
-import type { Product, UserRole } from '@/types'
+import type { Product, ProductCategory, UserRole } from '@/types'
 
 export default async function ProductsPage() {
   const supabase = await createClient()
@@ -17,17 +16,27 @@ export default async function ProductsPage() {
     .single()
 
   if (!profile) redirect('/login')
-  if (!isManagerRole(profile.role as UserRole)) redirect('/my-events')
+  const adminRoles: UserRole[] = ['SUPERADMIN', 'TENANT_ADMIN', 'OWNER']
+  if (!adminRoles.includes(profile.role as UserRole)) redirect('/my-events')
 
-  const { data: products } = await supabase
-    .from('products')
-    .select('*, category:product_categories(name)')
-    .eq('tenant_id', profile.tenant_id)
-    .order('name', { ascending: true })
+  const [{ data: products }, { data: categories }] = await Promise.all([
+    supabase
+      .from('products')
+      .select('*, category:product_categories(name)')
+      .eq('tenant_id', profile.tenant_id)
+      .order('name', { ascending: true }),
+    supabase
+      .from('product_categories')
+      .select('*')
+      .eq('tenant_id', profile.tenant_id)
+      .order('sort_order', { ascending: true }),
+  ])
 
   return (
     <ProductsClient
       products={(products ?? []) as (Product & { category: { name: string } | null })[]}
+      categories={(categories ?? []) as ProductCategory[]}
+      tenantId={profile.tenant_id!}
     />
   )
 }
