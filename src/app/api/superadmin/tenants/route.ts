@@ -33,7 +33,12 @@ export async function POST(request: NextRequest) {
     .select()
     .single()
 
-  if (tenantError) return NextResponse.json({ error: tenantError.message }, { status: 400 })
+  if (tenantError) {
+    if (tenantError.code === '23505') {
+      return NextResponse.json({ error: 'Ein Mandant mit diesem Slug oder Namen existiert bereits. Bitte wählen Sie einen anderen Namen.' }, { status: 400 })
+    }
+    return NextResponse.json({ error: tenantError.message }, { status: 400 })
+  }
 
   // Invite admin user
   const { data: invited, error: inviteError } = await admin.auth.admin.inviteUserByEmail(admin_email, {
