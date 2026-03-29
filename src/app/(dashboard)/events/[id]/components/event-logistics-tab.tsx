@@ -31,8 +31,8 @@ export function EventLogisticsTab({ eventId, tenantId, isManager }: EventLogisti
   const [saving, setSaving] = useState(false)
   const [editing, setEditing] = useState(false)
 
-  const [vehicleId, setVehicleId] = useState<string>('')
-  const [foodtruckId, setFoodtruckId] = useState<string>('')
+  const [vehicleId, setVehicleId] = useState<string>('none')
+  const [foodtruckId, setFoodtruckId] = useState<string>('none')
   const [equipmentNotes, setEquipmentNotes] = useState('')
 
   const loadData = useCallback(async () => {
@@ -56,8 +56,8 @@ export function EventLogisticsTab({ eventId, tenantId, isManager }: EventLogisti
     setFoodtrucks((foodtrucksData as Foodtruck[]) ?? [])
 
     if (logisticsData) {
-      setVehicleId(logisticsData.vehicle_id ?? '')
-      setFoodtruckId(logisticsData.foodtruck_id ?? '')
+      setVehicleId(logisticsData.vehicle_id ?? 'none')
+      setFoodtruckId(logisticsData.foodtruck_id ?? 'none')
       setEquipmentNotes(logisticsData.equipment_notes ?? '')
     }
 
@@ -75,8 +75,8 @@ export function EventLogisticsTab({ eventId, tenantId, isManager }: EventLogisti
       const payload = {
         event_id: eventId,
         tenant_id: tenantId,
-        vehicle_id: vehicleId || null,
-        foodtruck_id: foodtruckId || null,
+        vehicle_id: vehicleId === 'none' ? null : vehicleId,
+        foodtruck_id: foodtruckId === 'none' ? null : foodtruckId,
         equipment_notes: equipmentNotes || null,
       }
 
@@ -109,8 +109,8 @@ export function EventLogisticsTab({ eventId, tenantId, isManager }: EventLogisti
     )
   }
 
-  const vehicle = vehicles.find((v) => v.id === vehicleId)
-  const foodtruck = foodtrucks.find((f) => f.id === foodtruckId)
+  const vehicle = vehicleId !== 'none' ? vehicles.find((v) => v.id === vehicleId) : undefined
+  const foodtruck = foodtruckId !== 'none' ? foodtrucks.find((f) => f.id === foodtruckId) : undefined
 
   return (
     <Card className="border-border">
@@ -132,7 +132,7 @@ export function EventLogisticsTab({ eventId, tenantId, isManager }: EventLogisti
                   <SelectValue placeholder="Kein Fahrzeug" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Kein Fahrzeug</SelectItem>
+                  <SelectItem value="none">Kein Fahrzeug</SelectItem>
                   {vehicles.map((v) => (
                     <SelectItem key={v.id} value={v.id}>
                       {v.name} {v.license_plate ? `(${v.license_plate})` : ''}
@@ -149,7 +149,7 @@ export function EventLogisticsTab({ eventId, tenantId, isManager }: EventLogisti
                   <SelectValue placeholder="Kein Foodtruck" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Kein Foodtruck</SelectItem>
+                  <SelectItem value="none">Kein Foodtruck</SelectItem>
                   {foodtrucks.map((f) => (
                     <SelectItem key={f.id} value={f.id}>
                       {f.name}
