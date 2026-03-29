@@ -9,9 +9,9 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           <div className="flex flex-col items-center mb-8">
             <div className="flex items-center gap-2 mb-2">
               <div className="w-10 h-10 rounded-lg bg-sidebar-primary flex items-center justify-center">
-                <span className="text-white font-bold text-lg">H</span>
+                <span className="text-white font-bold text-sm leading-none">H+M</span>
               </div>
-              <span className="text-2xl font-bold text-foreground">+M EventHub</span>
+              <span className="text-2xl font-bold text-foreground">EventHub</span>
             </div>
             <p className="text-sm text-muted-foreground">Catering &amp; Foodtruck Management</p>
           </div>

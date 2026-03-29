@@ -172,10 +172,10 @@ export function AppSidebar({ profile }: AppSidebarProps) {
       <SidebarHeader className="border-b border-sidebar-border px-4 py-4">
         <Link href={isManager ? '/dashboard' : '/my-events'} className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-md bg-sidebar-primary flex items-center justify-center flex-shrink-0">
-            <span className="text-white font-bold text-sm">H</span>
+            <span className="text-white font-bold text-xs leading-none">H+M</span>
           </div>
           <div className="flex flex-col group-data-[collapsible=icon]:hidden">
-            <span className="font-semibold text-sidebar-foreground text-sm">H+M EventHub</span>
+            <span className="font-semibold text-sidebar-foreground text-sm">EventHub</span>
             <span className="text-xs text-sidebar-foreground/60">Catering Management</span>
           </div>
         </Link>
