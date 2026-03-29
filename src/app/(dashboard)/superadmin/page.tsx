@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Plus, Building2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { PageHeader } from '@/components/layout/page-header'
 import { StatsCard } from '@/components/dashboard/stats-card'
 import { Button } from '@/components/ui/button'
@@ -31,12 +32,14 @@ export default async function SuperadminPage() {
 
   if (!profile || profile.role !== 'TENANT_ADMIN') redirect('/dashboard')
 
+  const admin = createAdminClient()
+
   const [
     { data: tenants, count: tenantCount },
     { data: allProfiles, count: userCount },
   ] = await Promise.all([
-    supabase.from('tenants').select('*', { count: 'exact' }).order('created_at', { ascending: false }),
-    supabase.from('profiles').select('*', { count: 'exact' }),
+    admin.from('tenants').select('*', { count: 'exact' }).order('created_at', { ascending: false }),
+    admin.from('profiles').select('*', { count: 'exact' }),
   ])
 
   const activeTenants = tenants?.filter((t) => t.status === 'ACTIVE').length ?? 0
@@ -45,8 +48,8 @@ export default async function SuperadminPage() {
   const tenantStats = await Promise.all(
     (tenants ?? []).map(async (tenant) => {
       const [{ count: uc }, { count: ec }] = await Promise.all([
-        supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('tenant_id', tenant.id),
-        supabase.from('events').select('*', { count: 'exact', head: true }).eq('tenant_id', tenant.id),
+        admin.from('profiles').select('*', { count: 'exact', head: true }).eq('tenant_id', tenant.id),
+        admin.from('events').select('*', { count: 'exact', head: true }).eq('tenant_id', tenant.id),
       ])
       return { tenantId: tenant.id, userCount: uc ?? 0, eventCount: ec ?? 0 }
     })
