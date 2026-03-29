@@ -347,6 +347,8 @@ export const es = {
     manageProfile: 'Gestionar nombre, teléfono y foto de perfil',
     manageSecurity: 'Gestionar contraseña y sesiones',
     manageLanguage: 'Seleccionar idioma preferido',
+    checklists: 'Listas de control',
+    manageChecklists: 'Gestionar plantillas y subir PDFs centralmente',
   },
   users: {
     title: 'Usuarios',

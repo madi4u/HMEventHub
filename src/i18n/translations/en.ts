@@ -347,6 +347,8 @@ export const en = {
     manageProfile: 'Manage name, phone and profile picture',
     manageSecurity: 'Manage password and sessions',
     manageLanguage: 'Select preferred language',
+    checklists: 'Checklists',
+    manageChecklists: 'Manage templates and upload PDFs centrally',
   },
   users: {
     title: 'Users',

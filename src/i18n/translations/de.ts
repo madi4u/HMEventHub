@@ -347,6 +347,8 @@ export const de = {
     manageProfile: 'Name, Telefon und Profilbild verwalten',
     manageSecurity: 'Passwort und Sitzungen verwalten',
     manageLanguage: 'Bevorzugte Sprache auswählen',
+    checklists: 'Kontrollblätter',
+    manageChecklists: 'Vorlagen zentral verwalten und PDFs hinterlegen',
   },
   users: {
     title: 'Benutzer',

@@ -303,6 +303,7 @@ export interface ChecklistTemplate {
   description: string | null
   category: ChecklistCategory
   is_active: boolean
+  pdf_url: string | null
   created_at: string
   // Joined
   items?: ChecklistTemplateItem[]

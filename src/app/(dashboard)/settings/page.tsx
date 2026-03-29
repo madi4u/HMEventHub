@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { User, Lock, Globe } from 'lucide-react'
+import { User, Lock, Globe, ClipboardList } from 'lucide-react'
 import { PageHeader } from '@/components/layout/page-header'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { useTranslation } from '@/i18n'
@@ -27,6 +27,12 @@ export default function SettingsPage() {
       description: t('settings.manageLanguage'),
       href: '/settings/language',
       icon: Globe,
+    },
+    {
+      title: t('settings.checklists'),
+      description: t('settings.manageChecklists'),
+      href: '/settings/checklists',
+      icon: ClipboardList,
     },
   ]
 
