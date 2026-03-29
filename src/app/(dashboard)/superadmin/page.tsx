@@ -29,7 +29,7 @@ export default async function SuperadminPage() {
     .eq('user_id', user.id)
     .single()
 
-  if (!profile || profile.role !== 'SUPERADMIN') redirect('/dashboard')
+  if (!profile || profile.role !== 'TENANT_ADMIN') redirect('/dashboard')
 
   const [
     { data: tenants, count: tenantCount },

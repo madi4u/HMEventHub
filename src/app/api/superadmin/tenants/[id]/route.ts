@@ -16,7 +16,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   if (!user) return NextResponse.json({ error: 'Nicht authentifiziert' }, { status: 401 })
 
   const { data: profile } = await supabase.from('profiles').select('role').eq('user_id', user.id).single()
-  if (!profile || profile.role !== 'SUPERADMIN') return NextResponse.json({ error: 'Nicht berechtigt' }, { status: 403 })
+  if (!profile || profile.role !== 'TENANT_ADMIN') return NextResponse.json({ error: 'Nicht berechtigt' }, { status: 403 })
 
   const body = await request.json()
   const parsed = schema.safeParse(body)

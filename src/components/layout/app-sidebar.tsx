@@ -109,7 +109,7 @@ export function AppSidebar({ profile }: AppSidebarProps) {
       title: t('nav.superadmin'),
       href: '/superadmin',
       icon: ShieldAlert,
-      roles: ['SUPERADMIN'],
+      roles: ['TENANT_ADMIN'],
     },
   ]
 
