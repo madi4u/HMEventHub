@@ -7,7 +7,6 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { toast } from 'sonner'
 import { Loader2 } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
 import { PageHeader } from '@/components/layout/page-header'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -19,6 +18,7 @@ import { slugify } from '@/lib/utils'
 const tenantSchema = z.object({
   name: z.string().min(2, 'Mindestens 2 Zeichen'),
   slug: z.string().min(2, 'Mindestens 2 Zeichen').regex(/^[a-z0-9-]+$/, 'Nur Kleinbuchstaben, Zahlen und Bindestriche'),
+  admin_name: z.string().min(2, 'Mindestens 2 Zeichen'),
   admin_email: z.string().email('Ungültige E-Mail'),
   status: z.enum(['ACTIVE', 'INACTIVE', 'SUSPENDED']),
 })
@@ -32,10 +32,10 @@ export default function NewTenantPage() {
   const {
     register,
     handleSubmit,
-    watch,
     setValue,
     formState: { errors },
   } = useForm<TenantForm>({
+    resolver: zodResolver(tenantSchema),
     defaultValues: { status: 'ACTIVE' },
   })
 
@@ -48,24 +48,17 @@ export default function NewTenantPage() {
   async function onSubmit(data: TenantForm) {
     setLoading(true)
     try {
-      const supabase = createClient()
-
-      const { data: tenant, error } = await supabase
-        .from('tenants')
-        .insert({
-          name: data.name,
-          slug: data.slug,
-          status: data.status,
-        })
-        .select()
-        .single()
-
-      if (error) {
-        toast.error('Fehler beim Erstellen des Mandanten: ' + error.message)
+      const res = await fetch('/api/superadmin/tenants', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      })
+      const json = await res.json()
+      if (!res.ok) {
+        toast.error(json.error ?? 'Fehler beim Erstellen des Mandanten')
         return
       }
-
-      toast.success('Mandant erstellt')
+      toast.success(`Mandant erstellt und Einladung an ${data.admin_email} gesendet`)
       router.push('/superadmin')
     } catch {
       toast.error('Unerwarteter Fehler')
@@ -114,6 +107,16 @@ export default function NewTenantPage() {
             </div>
 
             <div className="space-y-2">
+              <Label htmlFor="admin_name">Admin Name *</Label>
+              <Input
+                id="admin_name"
+                placeholder="Max Mustermann"
+                {...register('admin_name')}
+              />
+              {errors.admin_name && <p className="text-sm text-destructive">{errors.admin_name.message}</p>}
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="admin_email">Admin E-Mail *</Label>
               <Input
                 id="admin_email"
@@ -122,6 +125,7 @@ export default function NewTenantPage() {
                 {...register('admin_email')}
               />
               {errors.admin_email && <p className="text-sm text-destructive">{errors.admin_email.message}</p>}
+              <p className="text-xs text-muted-foreground">Diese Person erhält eine Einladungs-E-Mail</p>
             </div>
 
             <div className="space-y-2">
@@ -141,7 +145,7 @@ export default function NewTenantPage() {
             <div className="flex gap-2 pt-2">
               <Button type="submit" disabled={loading} className="flex-1">
                 {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                Mandant erstellen
+                Mandant erstellen & einladen
               </Button>
               <Button
                 type="button"

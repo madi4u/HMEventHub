@@ -139,7 +139,9 @@ export default async function SuperadminPage() {
                         {formatDate(tenant.created_at)}
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button variant="ghost" size="sm">Verwalten</Button>
+                        <Link href={`/superadmin/tenants/${tenant.id}`}>
+                          <Button variant="ghost" size="sm">Verwalten</Button>
+                        </Link>
                       </TableCell>
                     </TableRow>
                   )
