@@ -1,12 +1,8 @@
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   output: "standalone",
   typescript: {
     ignoreBuildErrors: true,
-  },
-  eslint: {
-    ignoreDuringBuilds: true,
   },
   async headers() {
     return [
@@ -21,6 +17,6 @@ const nextConfig: NextConfig = {
       },
     ]
   },
-};
+}
 
-export default nextConfig;
+export default nextConfig
