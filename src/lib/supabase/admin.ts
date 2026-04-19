@@ -1,9 +1,16 @@
-import { createClient } from '@supabase/supabase-js'
+import { db } from "@/lib/db"
 
 export function createAdminClient() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { auth: { autoRefreshToken: false, persistSession: false } }
-  )
+  return {
+    from(table: string) {
+      return db.from(table)
+    },
+    auth: {
+      admin: {
+        async inviteUserByEmail(_email: string) {
+          return { data: null, error: new Error("Use auth.hundm.cloud for user management") }
+        },
+      },
+    },
+  }
 }
