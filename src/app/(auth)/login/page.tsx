@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation"
 
-// Auth is handled by auth.hundm.cloud — middleware redirects automatically
+// Middleware handles auth — redirect directly to app
 export default function LoginPage() {
-  const authUrl = process.env.AUTH_SERVICE_URL ?? "https://auth.hundm.cloud"
-  redirect(`${authUrl}/login`)
+  redirect('/events')
 }
