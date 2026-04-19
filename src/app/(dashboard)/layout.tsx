@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { getSessionFromHeaders } from '@/lib/session'
+import { db } from '@/lib/db'
 import { AppSidebar } from '@/components/layout/app-sidebar'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { I18nProvider } from '@/i18n/provider'
@@ -10,36 +11,32 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode
 }) {
-  const supabase = await createClient()
+  const session = await getSessionFromHeaders()
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
+  if (!session) {
     redirect('/login')
   }
 
-  const { data: profile } = await supabase
+  const { data: profile } = await db
     .from('profiles')
     .select('*')
-    .eq('user_id', user.id)
+    .eq('user_id', session.userId)
     .single()
 
   if (!profile) {
     redirect('/login')
   }
 
-  const typedProfile = profile as Profile
+  const typedProfile = profile as unknown as Profile
 
-  const { data: tenant } = await supabase
+  const { data: tenant } = await db
     .from('tenants')
     .select('name')
-    .eq('id', typedProfile.tenant_id)
+    .eq('id', typedProfile.tenant_id ?? '')
     .single()
 
   return (
-    <I18nProvider initialLanguage={typedProfile.preferred_language} tenantName={tenant?.name ?? ''}>
+    <I18nProvider initialLanguage={typedProfile.preferred_language} tenantName={(tenant as { name?: string } | null)?.name ?? ''}>
       <SidebarProvider>
         <AppSidebar profile={typedProfile} />
         <SidebarInset>
