@@ -84,6 +84,14 @@ async function main() {
       'SELECT id FROM identity.users WHERE email = $1',
       [p.email]
     )
+    if (!existing[0]) {
+      await pool.query(
+        `INSERT INTO identity.users (id, email, name, is_active, locale, timezone)
+         VALUES ($1, $2, $3, true, 'de-DE', 'Europe/Berlin')
+         ON CONFLICT (id) DO NOTHING`,
+        [p.user_id, p.email, p.full_name]
+      )
+    }
     const userId = existing[0]?.id ?? p.user_id
 
     await pool.query(`
@@ -161,11 +169,32 @@ async function main() {
   // ============================================================
   console.log("📦 Migrating cash_reports...")
   const cashReports = await supabaseFetch("cash_reports")
-  await upsertRows("cash_reports", cashReports)
+  await upsertRows("cash_reports", cashReports.map((r: Record<string, unknown>) => ({
+    id: r.id,
+    tenant_id: r.tenant_id,
+    event_id: r.event_id,
+    event_day_id: r.event_day_id,
+    created_by: r.submitted_by_user_id ?? r.created_by ?? null,
+    submitted_by_user_id: r.submitted_by_user_id ?? null,
+    submitted_at: r.submitted_at ?? null,
+    notes: r.notes ?? null,
+    total_amount: r.total_amount ?? 0,
+    status: r.status ?? 'DRAFT',
+    signature_file_path: r.signature_file_path ?? null,
+    cash_photo_file_path: r.cash_photo_file_path ?? null,
+    pdf_file_path: r.pdf_file_path ?? null,
+    created_at: r.created_at,
+    updated_at: r.updated_at,
+  })))
   const denominations = await supabaseFetch("cash_report_denominations")
-  // Filter out computed column
   await upsertRows("cash_report_denominations",
-    denominations.map((d: Record<string, unknown>) => ({ id: d.id, cash_report_id: d.cash_report_id, denomination: d.denomination, count: d.count }))
+    denominations.map((d: Record<string, unknown>) => ({
+      id: d.id,
+      cash_report_id: d.cash_report_id,
+      denomination: d.denomination ?? d.denomination_value,
+      denomination_type: d.denomination_type ?? null,
+      count: d.count ?? d.quantity,
+    }))
   )
   console.log(`  ✅ ${cashReports.length} cash reports`)
 
@@ -178,7 +207,11 @@ async function main() {
   const templateItems = await supabaseFetch("checklist_template_items")
   await upsertRows("checklist_template_items", templateItems)
   const runs = await supabaseFetch("event_checklist_runs")
-  await upsertRows("event_checklist_runs", runs)
+  await upsertRows("event_checklist_runs", runs.map((r: Record<string, unknown>) => ({
+    ...r,
+    created_by: r.created_by ?? r.completed_by ?? null,
+    completed_by: r.completed_by ?? null,
+  })))
   const answers = await supabaseFetch("event_checklist_answers")
   await upsertRows("event_checklist_answers", answers)
   console.log(`  ✅ ${templates.length} templates, ${runs.length} runs`)
