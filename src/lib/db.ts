@@ -19,6 +19,13 @@ const pool = new Pool({
 type Row = Record<string, unknown>
 type QueryResult = { data: Row[] | null; error: Error | null }
 
+/** Strip PostgREST join tokens like `alias:table(cols)` or `table(cols)` to plain SQL cols. */
+function stripJoins(cols: string): string {
+  const tokens = cols.split(",").map((t) => t.trim())
+  const plain = tokens.filter((t) => !t.includes("("))
+  return plain.length > 0 ? plain.join(", ") : "*"
+}
+
 class QueryBuilder {
   private _table: string
   private _schema: string
@@ -33,14 +40,18 @@ class QueryBuilder {
   private _delete: boolean = false
   private _upsert: Row[] | null = null
   private _conflictCols: string[] | null = null
+  private _countOnly: boolean = false
+  private _withCount: boolean = false
 
   constructor(table: string, schema: string = "eventhub") {
     this._table = table
     this._schema = schema
   }
 
-  select(cols: string = "*") {
-    this._selectCols = cols
+  select(cols: string = "*", opts?: { count?: "exact"; head?: boolean }) {
+    this._selectCols = stripJoins(cols)
+    if (opts?.count === "exact") this._withCount = true
+    if (opts?.head) this._countOnly = true
     return this
   }
 
@@ -206,18 +217,24 @@ class QueryBuilder {
       }
 
       // SELECT
+      if (this._countOnly) {
+        const sql = `SELECT COUNT(*) FROM ${fqt} ${this.whereClause()}`
+        const res = await pool.query(sql, this._params)
+        return { data: null, count: parseInt(res.rows[0]?.count ?? "0"), error: null }
+      }
       let sql = `SELECT ${this._selectCols} FROM ${fqt} ${this.whereClause()}`
       if (this._orderBy) sql += ` ORDER BY ${this._orderBy}`
       if (this._limit) sql += ` LIMIT ${this._limit}`
       const res = await pool.query(sql, this._params)
       const result = this._single ? res.rows[0] ?? null : res.rows
-      return { data: result, error: null }
+      const count = this._withCount ? res.rowCount ?? res.rows.length : undefined
+      return { data: result, count, error: null }
     } catch (err) {
       return { data: null, error: err as Error }
     }
   }
 
-  then(resolve: (v: { data: Row | Row[] | null; error: Error | null }) => void) {
+  then(resolve: (v: { data: Row | Row[] | null; count?: number; error: Error | null }) => void) {
     return this.execute().then(resolve)
   }
 }
